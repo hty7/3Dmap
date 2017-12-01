@@ -1,0 +1,715 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>广东省人口常驻移动</title>
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <!-- bootstrap-->
+    <link href="js/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script><!-- bootstrap-->
+    <link href="js/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="js/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script type="text/javascript" src="js/echarts3/echarts.min.js"></script>
+    <script type="text/javascript" src="js/echarts3/echarts3.7.2.min.js"></script>
+    <script type="text/javascript" src="js/echarts3/echarts-liquidfill.js"></script>
+    <script type="text/javascript" src="js/echarts3/chalk.js"></script>
+
+    <!-- mapbox -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="http://echarts.baidu.com/resource/echarts-gl-latest/dist/echarts-gl.min.js"></script>
+    <script src="http://echarts.baidu.com/resource/echarts-gl-latest/mapboxgl-token.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v0.9.2/mapbox-gl-language.js'></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.1.0/mapbox-gl-compare.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.1.0/mapbox-gl-compare.css' type='text/css' />
+
+    <!--new 样式-->
+    <link href="css/new-style.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="css/iconfont.css">
+</head>
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    body * {
+       -webkit-touch-callout: none;
+         -webkit-user-select: none;
+            -moz-user-select: none;
+             -ms-user-select: none;
+                 user-select: none;
+    }
+    .mm-container {
+        padding: 0;
+    }
+    .map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+    .sidebar {
+        width: 30%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        direction: rtl;
+        overflow: auto;
+    }
+    .sidebar-right {
+        width: 260px;
+        position: fixed;
+        top: 0;
+        right: 0;
+    }
+    .toggerSidebar {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 1s;
+        -moz-transition: -moz-transform 1s;
+        -webkit-transition: -webkit-transform 1s;
+        -o-transition: -o-transform 1s;
+    }
+    .toggerSidebar:hover, .showSidebar:hover {
+        color: #00abff;
+        transform: rotate(180deg);
+        -moz-transform: rotate(180deg); /* Firefox 4 */
+        -webkit-transform: rotate(180deg); /* Safari and Chrome */
+        -o-transform: rotate(180deg); /* Opera */
+    }
+    .sidebar-content {
+        margin: 50px 10px;
+    }
+    .panel {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    .panel2 {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .panel-heading {
+        font-size: 15px;
+        color: #fff;
+        direction: ltr;
+        unicode-bidi: bidi-override;
+    }
+    .panel-body {
+        background-color: rgba(0, 0, 0, 0.2);
+        height: 300px;
+        transition: all 1s;
+    }
+    .panel-body:active {
+    }
+    .panel-body-right {
+        padding: 10px;
+        height: 200px;
+    }
+    .mm-container .icon {
+        color: #fff;
+        font-size: 12px;
+        padding: 0 3px;
+    }
+    .mm-container .icon:hover {
+        font-weight: bold;
+        color: #00abff;
+    }
+</style>
+<body>
+<div class="mm-container">
+    <div id="chart-map" class="map"></div>
+    <div id="sidebar" class="sidebar">
+        <div id="toggerSidebar" class="toggerSidebar">×</div>
+        <div id="showSidebar" class="toggerSidebar" style="visibility: hidden;">+</div>
+        <div class="sidebar-content">
+            <section class="panel">
+                <div class="panel-heading">
+                    <span href="">| 关键字稳定图表</span>
+                    <div class="pull-right">
+                        <i class="icon iconfont icon-xiala" onclick="isHidden('chartBox1')"></i>
+                        <i class="icon iconfont icon-refresh"></i>
+                    </div>
+                </div>
+                <div class="panel-body" id="chartBox1"></div>
+            </section>
+            <section class="panel">
+                <div class="panel-heading">
+                    <span href="">| 关键字稳定图表2</span>
+                    <div class="pull-right">
+                        <i class="icon iconfont icon-xiala" onclick="isHidden('chartBox2')"></i>
+                        <i class="icon iconfont icon-refresh"></i>
+                    </div>
+                </div>
+                <div class="panel-body" id="chartBox2"></div>
+            </section>
+        </div>
+    </div>
+     <div id="sidebar-right" class="sidebar-right">
+        <div class="sidebar-content">
+            <section class="panel2">
+                <div class="panel-heading">
+                    <span href="">| 关键字稳定数据</span>
+                    <div class="pull-right">
+                        <i class="icon iconfont icon-xiala" onclick="isHidden('chartBox3')"></i>
+                        <i class="icon iconfont icon-refresh"></i>
+                    </div>
+                </div>
+                <div class="panel-body-right" id="chartBox3">
+                    <p style="float: right;color: #fff;font-size: 15px;">
+                        <i class="icon iconfont icon-chinaMap" style="font-size: 30px"></i>移动人口
+                    </p>
+                    <br/>
+                    <span style="float: right;color: #00fff5;font-size: 30px;">100,1000,1000</span>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    function isHidden (el) {
+        var vDiv = document.getElementById(el);
+        vDiv.style.display = (vDiv.style.display === 'none')?'block':'none';
+    }
+    $(function(){
+        $('.icon-xiala').click(function(index, val) {
+            // console.log($(this).toggleClass())
+        })
+        var myChart = echarts.init(document.getElementById('chart-map'),'chalk');
+        var uploadedDataURL = "js/echarts3/map/guangdong.json";
+        var guangdongData = [
+            {name: '广州市', value: 100},
+            {name: '深圳市', value: 85},
+            {name: '珠海市', value: 70},
+            {name: '汕头市', value: 20},
+            {name: '佛山市', value: 77},
+            {name: '韶关市', value: 60},
+            {name: '湛江市', value: 1},
+            {name: '肇庆市', value: 98},
+            {name: '江门市', value: 90},
+            {name: '茂名市', value: 45},
+            {name: '惠州市', value: 25},
+            {name: '梅州市', value: 35},
+            {name: '汕尾市', value: 45},
+            {name: '河源市', value: 70},
+            {name: '阳江市', value: 65},
+            {name: '清远市', value: 75},
+            {name: '东莞市', value: 85},
+            {name: '中山市', value: 95},
+            {name: '潮州市', value: 80},
+            {name: '揭阳市', value: 16},
+            {name: '云浮市', value: 52}
+        ];
+        var palceCodData = [
+            {name: '广州市', value: [113.475995,23.417055]},
+            {name: '深圳市', value: [114.032357,22.675157]},
+            {name: '珠海市', value: [113.234262,22.167468]},
+            {name: '汕头市', value: [116.442536,23.305796]},
+            {name: '佛山市', value: [112.994017,23.032548]},
+            {name: '韶关市', value: [113.590304,24.844739]},
+            {name: '湛江市', value: [110.064944,21.335451]},
+            {name: '肇庆市', value: [112.165740,23.464062]},
+            {name: '江门市', value: [112.687406,22.397417]},
+            {name: '茂名市', value: [110.886700,21.850193]},
+            {name: '惠州市', value: [114.413784,23.131249]},
+            {name: '梅州市', value: [116.123213,24.307352]},
+            {name: '汕尾市', value: [115.378103,23.046161]},
+            {name: '河源市', value: [114.794798,23.867677]},
+            {name: '阳江市', value: [111.782165,22.068633]},
+            {name: '清远市', value: [113.072816,24.205702]},
+            {name: '东莞市', value: [113.761870,23.032629]},
+            {name: '中山市', value: [113.388499,22.531929]},
+            {name: '潮州市', value: [116.623721,23.779569]},
+            {name: '揭阳市', value: [115.970463,23.373230]},
+            {name: '云浮市', value: [111.746914,22.934758]}
+        ];
+        var palceCodData2 = [
+            {name: '广州市', value: [113.675995,23.417055]},
+            {name: '深圳市', value: [114.232357,22.675157]},
+            {name: '珠海市', value: [113.434262,22.167468]},
+            {name: '汕头市', value: [116.642536,23.305796]},
+            {name: '佛山市', value: [113.194017,23.032548]},
+            {name: '韶关市', value: [113.790304,24.844739]},
+            {name: '湛江市', value: [110.264944,21.335451]},
+            {name: '肇庆市', value: [112.365740,23.464062]},
+            {name: '江门市', value: [112.887406,22.397417]},
+            {name: '茂名市', value: [111.086700,21.850193]},
+            {name: '惠州市', value: [114.613784,23.131249]},
+            {name: '梅州市', value: [116.323213,24.307352]},
+            {name: '汕尾市', value: [115.578103,23.046161]},
+            {name: '河源市', value: [114.994798,23.867677]},
+            {name: '阳江市', value: [111.982165,22.068633]},
+            {name: '清远市', value: [113.272816,24.205702]},
+            {name: '东莞市', value: [113.961870,23.032629]},
+            {name: '中山市', value: [113.588499,22.531929]},
+            {name: '潮州市', value: [116.823721,23.779569]},
+            {name: '揭阳市', value: [116.170463,23.373230]},
+            {name: '云浮市', value: [111.946914,22.934758]}
+        ];
+        var palceCodData3 = [
+            {name: '广州市', value: [113.675995,23.117055]},
+            {name: '深圳市', value: [114.232357,22.375157]},
+            {name: '珠海市', value: [113.434262,21.867468]},
+            {name: '汕头市', value: [116.642536,23.005796]},
+            {name: '佛山市', value: [113.194017,22.732548]},
+            {name: '韶关市', value: [113.790304,24.544739]},
+            {name: '湛江市', value: [110.264944,21.035451]},
+            {name: '肇庆市', value: [112.365740,23.164062]},
+            {name: '江门市', value: [112.887406,22.097417]},
+            {name: '茂名市', value: [111.086700,21.550193]},
+            {name: '惠州市', value: [114.613784,22.931249]},
+            {name: '梅州市', value: [116.323213,24.007352]},
+            {name: '汕尾市', value: [115.578103,22.746161]},
+            {name: '河源市', value: [114.994798,23.567677]},
+            {name: '阳江市', value: [111.982165,21.768633]},
+            {name: '清远市', value: [113.272816,23.905702]},
+            {name: '东莞市', value: [113.961870,22.732629]},
+            {name: '中山市', value: [113.588499,22.231929]},
+            {name: '潮州市', value: [116.823721,23.479569]},
+            {name: '揭阳市', value: [116.170463,23.073230]},
+            {name: '云浮市', value: [111.946914,22.634758]}
+        ];
+        var flexData = [
+            {name: '广州市', value: [1960.7,520.1]},
+            {name: '深圳市', value: [1886.6,392.5]},
+            {name: '珠海市', value: [268.6,90.7]},
+            {name: '汕头市', value: [513.9,92]},
+            {name: '佛山市', value: [919.2,308.5]},
+            {name: '韶关市', value: [192.7,67.7]},
+            {name: '湛江市', value: [481.5,31.7]},
+            {name: '肇庆市', value: [246.2,119.4]},
+            {name: '江门市', value: [375.9,147.9]},
+            {name: '茂名市', value: [375.8,85.6]},
+            {name: '惠州市', value: [601.4,200.3]},
+            {name: '梅州市', value: [275.7,48.6]},
+            {name: '汕尾市', value: [178,53.2]},
+            {name: '河源市', value: [192.7,56.3]},
+            {name: '阳江市', value: [164,69.1]},
+            {name: '清远市', value: [293.6,99.4]},
+            {name: '东莞市', value: [1091.3,481.7]},
+            {name: '中山市', value: [530.5,157.5]},
+            {name: '潮州市', value: [214.9,60.4]},
+            {name: '揭阳市', value: [379.9,91.9]},
+            {name: '云浮市', value: [140.1,74.7]}
+        ];
+        var newData1 = flexData.map(function(item, index) {
+            return {name: item.name, value: palceCodData[index].value.concat(item.value[0]), itemStyle: {color: '#48BEFC'}}
+        })
+        var newData2 = flexData.map(function(item, index) {
+            return {name: item.name, value: palceCodData2[index].value.concat(item.value[1]), itemStyle: {color: '#7BFA55'}}
+        })
+        var newData3 = flexData.map(function(item, index) {
+            return {name: item.name, value: palceCodData3[index].value.concat(0), itemStyle: {color: '#ccc'}}
+        })
+        mapboxgl.accessToken = mapboxglToken;
+        var option = {
+            title: {
+                text: '',
+                left: 'center',
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function (obj) {
+                    if (obj.seriesType === 'map3D') {
+                        return `${obj.name}</br>常驻人口：${flexData[obj.dataIndex].value[0]}<br>流动人口：${flexData[obj.dataIndex].value[1]}`
+                    } else {
+                        // return `${obj.name}</br>${obj.value[2]}`
+                    }
+                }
+            },
+            // visualMap: [{
+            //     show: false,
+            //     min: 0,
+            //     max: 100,
+            //     left: 'left',
+            //     top: 'bottom',
+            //     seriesIndex: 0,
+            //     text: ['高', '低'],
+            //     calculable: true,
+            //     inRange: {
+            //         color: ['#15B1E1', '#106896']
+            //     }
+            // }, {
+            //     show: false,
+            //     min: 100,
+            //     max: 2000,
+            //     seriesIndex: 1,
+            //     calculable: true,
+            //     inRange: {
+            //         color: ['#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+            //     }
+            // }, {
+            //     show: false,
+            //     min: 100,
+            //     max: 500,
+            //     seriesIndex: 2,
+            //     calculable: true,
+            //     inRange: {
+            //         color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8']
+            //     }
+            // }],
+            visualMap: [{
+                show: false,
+                min: 100,
+                max: 2000,
+                seriesIndex: 0,
+                calculable: true,
+                inRange: {
+                    color: ['#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                }
+            }],
+            mapbox: {
+                center: [113.075995,22.517055],
+                zoom: 7,
+                pitch: 55,
+                bearing: -10,
+                style: 'mapbox://styles/mapbox/satellite-v9',
+                localIdeographFontFamily: "'Noto Sans', 'Noto Sans CJK SC', sans-serif",
+                boxHeight: 20,
+                light: {
+                    main: {
+                        intensity: 1,
+                        shadow: true,
+                        shadowQuality: 'high'
+                    },
+                    ambient: {
+                        intensity: 0.2
+                    }
+                },
+                // altitudeScale: 3e2
+            },
+            series: [
+            {
+                name: '常驻人口',
+                type: 'bar3D',
+                shading: 'lambert',
+                coordinateSystem: 'mapbox',
+                silent: true,
+                barSize: 1.3, //柱子粗细
+                bevelSize: 0.3,
+                emphasis: {
+                    label: {
+                        show: false
+                    }
+                },
+                label: {
+                    show: true,
+                    distance: 20,
+                    formatter: '{b}',
+                    textStyle: {
+                        fontSize: 12,
+                    }
+                },
+                data: newData1,
+                zlevel: 5
+            },
+            {
+                name: '流动人口',
+                type: 'bar3D',
+                shading: 'lambert',
+                coordinateSystem: 'mapbox',
+                barSize: 1.3, //柱子粗细
+                bevelSize: 0.3,
+                emphasis: {
+                    label: {
+                        show: false
+                    }
+                },
+                data: newData2,
+                zlevel: 5
+            },
+            // {
+            //     name: '市名',
+            //     type: 'bar3D',
+            //     coordinateSystem: 'mapbox',
+            //     label: {
+            //         show: true,
+            //         distance: 20,
+            //         formatter: '{b}',
+            //         textStyle: {
+            //             fontSize: 12,
+            //         }
+            //     },
+            //     data: newData3,
+            //     zlevel: 5
+            // }
+            ]
+        };
+        $.get(uploadedDataURL, function (geoJson) {
+            echarts.registerMap('guangdong', geoJson);
+            myChart.setOption(option);
+            var map = myChart.getModel().getComponent('mapbox').getMapbox();
+            // map.addControl(new mapboxgl.NavigationControl());
+            mapboxgl.setRTLTextPlugin('https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.1.0/mapbox-gl-rtl-text.js');
+            map.addControl(new MapboxLanguage({
+              defaultLanguage: 'zh'
+            }));
+            map.on('load', function () {
+                map.addSource("states", {
+                    "type": "geojson",
+                    "data": "js/echarts3/guangdong.json"
+                });
+
+                map.addLayer({
+                    "id": "state-fills",
+                    "type": "fill",
+                    "source": "states",
+                    "layout": {},
+                    "paint": {
+                        "fill-color": "#627BC1",
+                        "fill-opacity": 0.3
+                    }
+                });
+
+                map.addLayer({
+                    "id": "state-borders",
+                    "type": "line",
+                    "source": "states",
+                    "layout": {},
+                    "paint": {
+                        "line-color": "#ccc",
+                        "line-width": 2
+                    }
+                });
+
+                map.addLayer({
+                    "id": "state-fills-hover",
+                    "type": "fill",
+                    "source": "states",
+                    "layout": {},
+                    "paint": {
+                        "fill-color": "#627BC1",
+                        "fill-opacity": 1
+                    },
+                    "filter": ["==", "name", ""]
+                });
+
+                map.on("mousemove", "state-fills", function(e) {
+                    map.setFilter("state-fills-hover", ["==", "name", e.features[0].properties.name]);
+                });
+
+                map.on("mouseleave", "state-fills", function() {
+                    map.setFilter("state-fills-hover", ["==", "name", ""]);
+                });
+            });
+        });
+
+        var myChart1 = echarts.init(document.getElementById('chartBox1'),'chalk');
+        var option1 = {
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            color: ['#49C1B6', '#FDC20A', '#F78320', '#068E81', '#EA007B'],
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    lineStyle: {
+                        color: '#777'
+                    }       
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: {
+                data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+            },
+            yAxis: {
+                type: 'value',
+                axisTick: {show: false},
+                axisLine: {show: false},
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: '#aaa',
+                        opacity: 0.5
+                    }
+                },
+            },
+            series: [{
+                name: 'A',
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 4,
+                showSymbol: false,
+                itemStyle:{
+                    normal:{
+                        shadowBlur: 6,
+                        shadowColor:'#49C1B6'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        width: 0
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: "0.6",
+                    }
+                },
+                data: [0, -7.5, -1.0, 3.7, 0, -3, 8, 0,-3.6, 4, -2, 0]
+            }, {
+                name: 'B',
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 4,
+                showSymbol: false,
+                itemStyle:{
+                    normal:{
+                        shadowBlur: 6,
+                        shadowColor:'#FDC20A'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        width: 0
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: "0.6",
+                    }
+                },
+                data: [0, -2.2, 2, -2.2, 0, -1.5, 0, 2.4, -1, 3, -1, 0]
+            }, {
+                name: 'C',
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 4,
+                showSymbol: false,
+                itemStyle:{
+                    normal:{
+                        shadowBlur: 6,
+                        shadowColor:'#F78320'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        width: 0
+                    }
+                },
+                areaStyle: {
+                    normal: {
+                        opacity: "0.6",
+                    }
+                },
+                data: [0, 2.3, 0, 1.2, -1, 3, 0, -3.3, 0, 2, -0.3, 0]
+            }]
+        }
+        myChart1.setOption(option1);
+
+        var myChart2 = echarts.init(document.getElementById('chartBox2'),'chalk');
+        var option2 = {
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    lineStyle: {
+                        color: '#777'
+                    }       
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                height: '60%',
+                containLabel: true
+            },
+            xAxis: {
+                data: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            },
+            yAxis: {
+                type: 'value',
+                axisTick: {show: false},
+                axisLine: {show: false}
+            },
+            series: [{
+                type: 'liquidFill',
+                center: ['15%', '20%'],
+                radius: '30%',
+                outline: {show: false},
+                label: {
+                    normal: {
+                        fontSize: 20
+                    }
+                },
+                data: [0.6,0.6,0.6],
+            }, {
+                type: 'liquidFill',
+                center: ['50%', '20%'],
+                radius: '30%',
+                outline: {show: false},
+                label: {
+                    normal: {
+                        fontSize: 20
+                    }
+                },
+                data: [0.2,0.2,0.2],
+            }, {
+                type: 'liquidFill',
+                center: ['85%', '20%'],
+                radius: '30%',
+                outline: {show: false},
+                label: {
+                    normal: {
+                        fontSize: 20
+                    }
+                },
+                data: [0.8],
+            }, {
+                type: 'bar',
+                barWidth: 10,
+                itemStyle: {
+                    normal: {
+                        show: true,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: '#00FFE6'
+                        }, {
+                            offset: 1,
+                            color: '#007CC6'
+                        }]),
+                        barBorderRadius: [20,20,0,0]
+                    }
+                },
+                data: [220, 182, 191, 234, 290, 330, 310]
+            }]
+        }
+        myChart2.setOption(option2);
+
+
+        // 侧边栏显示隐藏
+        $('#toggerSidebar').click(function(){
+            $('#toggerSidebar').css('visibility','hidden')
+            $('#showSidebar').css('visibility','visible')
+            $('.sidebar').animate({
+                left: '-27%'
+            }, 800)
+        });
+        $('#showSidebar').click(function(){
+            $('#showSidebar').css('visibility','hidden')
+            $('#toggerSidebar').css('visibility','visible')
+            $('.sidebar').animate({
+                left: '0'
+            }, 200)
+        });
+    });
+</script>
+</body>
+</html>
