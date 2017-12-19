@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>广东省人口常驻移动</title>
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <!-- bootstrap-->
+    <link href="js/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="js/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script><!-- bootstrap-->
+    <link href="js/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="js/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script type="text/javascript" src="js/echarts3/echarts.min.js"></script>
+    <script type="text/javascript" src="js/echarts3/echarts3.7.2.min.js"></script>
+    <script type="text/javascript" src="js/echarts3/echarts-liquidfill.js"></script>
+    <script type="text/javascript" src="js/echarts3/chalk.js"></script>
+
+    <!-- mapbox -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="http://echarts.baidu.com/resource/echarts-gl-latest/dist/echarts-gl.min.js"></script>
+    <script src="http://echarts.baidu.com/resource/echarts-gl-latest/mapboxgl-token.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v0.9.2/mapbox-gl-language.js'></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.1.0/mapbox-gl-compare.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.1.0/mapbox-gl-compare.css' type='text/css' />
+
+    <!--new 样式-->
+    <link href="css/new-style.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="css/iconfont.css">
+</head>
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    body * {
+       -webkit-touch-callout: none;
+         -webkit-user-select: none;
+            -moz-user-select: none;
+             -ms-user-select: none;
+                 user-select: none;
+    }
+    .mm-container {
+        padding: 0;
+    }
+    .map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+    #info {
+        display: block;
+        position: relative;
+        margin: 0px auto;
+        width: 50%;
+        padding: 10px;
+        border: none;
+        border-radius: 3px;
+        font-size: 12px;
+        text-align: center;
+        color: #222;
+        background: #fff;
+    }
+    .citySelect {
+        position: absolute;
+        top: 10px;
+        right: 50px;
+        z-index: 100;
+    }
+    .coordinates {
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        padding:5px 10px;
+        margin: 0;
+        font-size: 11px;
+        line-height: 18px;
+        border-radius: 3px;
+        display: none;
+    }
+</style>
+<body>
+<div class="mm-container">
+    <div class="citySelect">
+        <select id="citytype" name="citytype" class="selectpicker show-tick form-control">
+            <option value="4401">广州市</option>
+            <option value="4404">珠海市</option>
+        </select>
+    </div>
+    <div id="chart-map" class="map"></div>
+    <pre id='info'></pre>
+    <pre id='coordinates' class='coordinates'></pre>
+</div>
+<script>
+    $(function(){
+        mapboxgl.accessToken = mapboxglToken;
+        var map, option, dsCenter, canvas, gdPostion;
+        var uploadedDataURL = "js/echarts3/map/city/4401.json";
+        $.get('js/echarts3/guangdong.json', function(data) {
+            var res = $.parseJSON(data);
+            dsCenter = res.features.map(function(item, index) {
+                return item.properties
+            })
+            var html = null;
+            for(var i in dsCenter) {
+              html +='<option value="'+ dsCenter[i].id +'">'+ dsCenter[i].name +'</option>';
+            }
+            $("#citytype").html(html);
+        })
+         $.get('data/gdPostion.json', function(data) {
+            gdPostion = $.parseJSON(data);
+            drawnMap(gdPostion.广州市);
+        })
+        $("#citytype").change(function(val){
+            var selectObj = $("#citytype").get(0);
+            var procodeLabel= selectObj.options[selectObj.selectedIndex].text;
+            changeCity($("#citytype").val(), procodeLabel)
+        });
+        var myChart = echarts.init(document.getElementById('chart-map'),'chalk');
+        function setBarData (data, status) {
+            var positionOffset = data.map(function (item, index) {
+                return {name: item.name, value: [item.value[0] + 0.04, item.value[1]]}
+            });
+            var flexData = [
+                {name: '荔湾区', value: [113,23.417055]},
+                {name: '越秀区', value: [104,22.675157]},
+                {name: '海珠区', value: [213,22.167468]},
+                {name: '天河区', value: [216,23.305796]},
+                {name: '白云区', value: [112,23.032548]},
+                {name: '黄埔区', value: [13,24.844739]},
+                {name: '增城区', value: [40,21.335451]},
+                {name: '花都区', value: [12,23.464062]},
+                {name: '从化区', value: [22,22.397417]},
+                {name: '番禺区', value: [90,21.850193]},
+                {name: '南沙区', value: [64,23.131249]},
+                {name: '萝岗区', value: [23,23.200053]}
+            ];
+            var newData1 = data.map(function(item, index) {
+                return {name: item.name, value: item.value.concat(100), itemStyle: {color: '#48BEFC'}}
+            })
+            var newData2 = positionOffset.map(function(item, index) {
+                return {name: item.name, value:item.value.concat(50), itemStyle: {color: '#7BFA55'}}
+            })
+            if (status) {
+                return newData1
+            } else {
+                return newData2
+            }
+        }
+        function drawnMap (data) {
+            option = {
+                title: {
+                    text: '',
+                    left: 'center',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function (obj) {
+                        if (obj.seriesType === 'map3D') {
+                            return `${obj.name}</br>常驻人口：${flexData[obj.dataIndex].value[0]}<br>流动人口：${flexData[obj.dataIndex].value[1]}`
+                        } else {
+                        }
+                    }
+                },
+                visualMap: [{
+                    show: false,
+                    min: 0,
+                    max: 300,
+                    seriesIndex: 0,
+                    calculable: true,
+                    inRange: {
+                        color: ['#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                    }
+                }],
+                mapbox: {
+                    center: [113.475995,23.417055],
+                    zoom: 8,
+                    pitch: 60,
+                    bearing: -30,
+                    style: 'mapbox://styles/mapbox/satellite-v9',
+                    localIdeograsphFontFamily: "'Noto Sans', 'Noto Sans CJK SC', sans-serif",
+                    boxHeight: 20,
+                    light: {
+                        main: {
+                            intensity: 1,
+                            shadow: true,
+                            shadowQuality: 'high'
+                        },
+                        ambient: {
+                            intensity: 0.2
+                        }
+                    },
+                },
+                series: [
+                {
+                    name: '常驻人口',
+                    type: 'bar3D',
+                    shading: 'realistic',
+                    coordinateSystem: 'mapbox',
+                    silent: true,
+                    barSize: 1.5, //柱子粗细
+                    bevelSize: 0.3,
+                    emphasis: {
+                        label: {
+                            show: false
+                        }
+                    },
+                    label: {
+                        show: true,
+                        distance: 0,
+                        formatter: '{b}',
+                        textStyle: {
+                            fontSize: 12,
+                        }
+                    },
+                    animation: true,
+                    animationDurationUpdate: 100,
+                    animationEasingUpdate: 'linear',
+                    data: setBarData(data, 1),
+                    zlevel: 5
+                },
+                {
+                    name: '流动人口',
+                    type: 'bar3D',
+                    shading: 'lambert',
+                    coordinateSystem: 'mapbox',
+                    barSize: 1.5, //柱子粗细
+                    bevelSize: 0.3,
+                    emphasis: {
+                        label: {
+                            show: false
+                        }
+                    },
+                    data: setBarData(data, 0),
+                    zlevel: 5
+                },
+                ]
+            };
+            myChart.setOption(option);
+            map = myChart.getModel().getComponent('mapbox').getMapbox();
+            canvas = map.getCanvasContainer();
+            setMapBox (uploadedDataURL)
+        }
+        function changeCity (el, cityName) {
+            var chooseCity;
+            dsCenter.map(function(item, index) {
+                if (parseInt(item.id) == parseInt(el)) chooseCity = item
+            })
+            var data = eval('gdPostion.' + cityName)
+            option.series[0].data = setBarData(data, 1)
+            option.series[1].data = setBarData(data, 0)
+            myChart.setOption(option);
+            map.flyTo({
+                center: chooseCity.cp,
+                zoom: 8,
+                speed: 0.8,
+                curve: 1.8,
+                easing: function (t) {
+                    return t;
+                }
+            });
+            option.mapbox.center = chooseCity.cp
+            var url = `js/echarts3/map/city/${chooseCity.id}.json`
+            setMapBox2(url)
+        };
+        function setMapBox2 (dataURL) {
+            map.removeSource("states")
+            map.addSource("states", {
+                "type": "geojson",
+                "data": dataURL
+            });
+            map.addLayer({
+                "id": "state-fills",
+                "type": "fill",
+                "source": "states",
+                "layout": {},
+                "paint": {
+                    "fill-color": "#627BC1",
+                    "fill-opacity": 0.1
+                }
+            });
+            map.addLayer({
+                "id": "state-borders",
+                "type": "line",
+                "source": "states",
+                "layout": {},
+                "paint": {
+                    "line-color": "#fff",
+                    "line-width": 2
+                }
+            });
+            map.addLayer({
+                "id": "state-fills-hover",
+                "type": "fill",
+                "source": "states",
+                "layout": {},
+                "paint": {
+                    "fill-color": "#627BC1",
+                    "fill-opacity": 0.5
+                },
+                "filter": ["==", "name", ""]
+            });
+        };
+
+        var geojson = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [113.742480,24.292273]
+                }
+            }]
+        };
+        var isCursorOverPoint, isDragging;
+        var coordinates = document.getElementById('coordinates');
+        function mouseDown() {
+            if (!isCursorOverPoint) return;
+
+            isDragging = true;
+
+            // Set a cursor indicator
+            canvas.style.cursor = 'grab';
+
+            // Mouse events
+            map.on('mousemove', onMove);
+            map.once('mouseup', onUp);
+        }
+
+        function onMove(e) {
+            if (!isDragging) return;
+            var coords = e.lngLat;
+
+            // Set a UI indicator for dragging.
+            canvas.style.cursor = 'grabbing';
+
+            // Update the Point feature in `geojson` coordinates
+            // and call setData to the source layer `point` on it.
+            geojson.features[0].geometry.coordinates = [coords.lng, coords.lat];
+            map.getSource('point').setData(geojson);
+        }
+
+        function onUp(e) {
+            if (!isDragging) return;
+            var coords = e.lngLat;
+
+            // Print the coordinates of where the point had
+            // finished being dragged to on the map.
+            coordinates.style.display = 'block';
+            coordinates.innerHTML = 'Longitude: ' + coords.lng + '<br />Latitude: ' + coords.lat;
+            canvas.style.cursor = '';
+            console.log(`[${coords.lng.toFixed(6)},${coords.lat.toFixed(6)}]`)
+            isDragging = false;
+
+            // Unbind mouse events
+            map.off('mousemove', onMove);
+        }
+
+        function setMapBox (dataURL) {
+            map.addControl(new mapboxgl.NavigationControl());
+            map.addControl(new MapboxLanguage({
+              defaultLanguage: 'zh'
+            }));
+            map.on('load', function () {
+                map.addSource("states", {
+                    "type": "geojson",
+                    "data": dataURL
+                });
+
+                map.addLayer({
+                    "id": "state-fills",
+                    "type": "fill",
+                    "source": "states",
+                    "layout": {},
+                    "paint": {
+                        "fill-color": "#627BC1",
+                        "fill-opacity": 0.1
+                    }
+                });
+
+                map.addLayer({
+                    "id": "state-borders",
+                    "type": "line",
+                    "source": "states",
+                    "layout": {},
+                    "paint": {
+                        "line-color": "#fff",
+                        "line-width": 2
+                    }
+                });
+
+                map.addLayer({
+                    "id": "state-fills-hover",
+                    "type": "fill",
+                    "source": "states",
+                    "layout": {},
+                    "paint": {
+                        "fill-color": "#627BC1",
+                        "fill-opacity": 0.3
+                    },
+                    "filter": ["==", "name", ""]
+                });
+
+                map.on("mousemove", "state-fills", function(e) {
+                    document.getElementById('info').innerHTML =
+                        JSON.stringify(e.features[0].properties.name) + '<br />' +
+                        JSON.stringify(e.point) + '<br />' +
+                        JSON.stringify(e.lngLat);
+                    console.log(e.features[0].properties.name)
+                    map.setFilter("state-fills-hover", ["==", "name", e.features[0].properties.name]);
+                });
+
+                map.on("mouseleave", "state-fills", function() {
+                    map.setFilter("state-fills-hover", ["==", "name", ""]);
+                });
+
+                map.addSource('point', {
+                    "type": "geojson",
+                    "data": geojson
+                });
+                map.addLayer({
+                    "id": "point",
+                    "type": "circle",
+                    "source": "point",
+                    "paint": {
+                        "circle-radius": 10,
+                        "circle-color": "#3887be"
+                    }
+                });
+
+                // When the cursor enters a feature in the point layer, prepare for dragging.
+                map.on('mouseenter', 'point', function() {
+                    map.setPaintProperty('point', 'circle-color', '#3bb2d0');
+                    canvas.style.cursor = 'move';
+                    isCursorOverPoint = true;
+                    map.dragPan.disable();
+                });
+
+                map.on('mouseleave', 'point', function() {
+                    map.setPaintProperty('point', 'circle-color', '#3887be');
+                    canvas.style.cursor = '';
+                    isCursorOverPoint = false;
+                    map.dragPan.enable();
+                });
+
+                map.on('mousedown', mouseDown);
+            });
+        };
+    });
+</script>
+</body>
+</html>

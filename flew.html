@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>用户迁移</title>
+    <title>用户流动</title>
     <script src="js/jquery.min.js" type="text/javascript"></script>
     <!-- bootstrap-->
     <link href="js/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
@@ -15,12 +15,6 @@
     <script type="text/javascript" src="js/echarts3/echarts3.7.2.min.js"></script>
     <script type="text/javascript" src="js/echarts3/chalk.js"></script>
     <script type="text/javascript" src="js/echarts3/bmap.min.js"></script>
-
-    <!-- mapbox -->
-  <!--   <script src='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v0.42.0/mapbox-gl.css' rel='stylesheet' />
-    <script src="http://echarts.baidu.com/resource/echarts-gl-latest/dist/echarts-gl.min.js"></script> -->
-    <script src="http://echarts.baidu.com/resource/echarts-gl-latest/mapboxgl-token.js"></script>
 
     <!--new 样式-->
     <link href="css/new-style.css" rel="stylesheet" type="text/css"/>
@@ -53,8 +47,7 @@
 <script>
     $(function(){
         var myChart = echarts.init(document.getElementById('chart-map'));
-        var uploadedDataURL = "js/echarts3/map/guangdong.json";
-        var planePath = 'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z';
+        var uploadedDataURL = "js/echarts3/map/province/guangdong.json";
 
         var guangdongData = [
             {name: '广州市', value: 100},
@@ -102,73 +95,37 @@
             {name: '揭阳市', value: [115.970463,23.373230]},
             {name: '云浮市', value: [111.746914,22.934758]}
         ];
-        var linesData = [[[113.475995,23.417055],[112.994017,23.032548]],[[112.994017,23.032548],[113.475995,23.417055]],[[114.032357,22.675157],[113.761870,23.032629]],[[113.761870,23.032629],[114.032357,22.675157]],[[113.761870,23.032629],[113.475995,23.417055]],[[113.475995,23.417055],[113.761870,23.032629]],[[114.032357,22.675157],[114.413784,23.131249]],[[114.413784,23.131249],[114.032357,22.675157]],[[113.234262,22.167468],[113.388499,22.531929]],[[113.388499,22.531929],[113.234262,22.167468]],[[113.388499,22.531929],[111.782165,22.068633]],[[113.475995,23.417055],[113.072816,24.205702]]]
-        var palceCodData2 = [
-            {name: '广州市', value: [113.575995,23.417055]},
-            {name: '深圳市', value: [114.132357,22.675157]},
-            {name: '珠海市', value: [113.334262,22.167468]},
-            {name: '汕头市', value: [116.542536,23.305796]},
-            {name: '佛山市', value: [113.094017,23.032548]},
-            {name: '韶关市', value: [113.690304,24.844739]},
-            {name: '湛江市', value: [110.164944,21.335451]},
-            {name: '肇庆市', value: [112.265740,23.464062]},
-            {name: '江门市', value: [112.787406,22.397417]},
-            {name: '茂名市', value: [110.986700,21.850193]},
-            {name: '惠州市', value: [114.513784,23.131249]},
-            {name: '梅州市', value: [116.223213,24.307352]},
-            {name: '汕尾市', value: [115.478103,23.046161]},
-            {name: '河源市', value: [114.894798,23.867677]},
-            {name: '阳江市', value: [111.882165,22.068633]},
-            {name: '清远市', value: [113.172816,24.205702]},
-            {name: '东莞市', value: [113.861870,23.032629]},
-            {name: '中山市', value: [113.488499,22.531929]},
-            {name: '潮州市', value: [116.723721,23.779569]},
-            {name: '揭阳市', value: [116.070463,23.373230]},
-            {name: '云浮市', value: [111.846914,22.934758]}
-        ];
         var flexData = [
-            {name: '广州市', value: [1960.7,520.1]},
-            {name: '深圳市', value: [1886.6,392.5]},
-            {name: '珠海市', value: [268.6,90.7]},
-            {name: '汕头市', value: [513.9,92]},
-            {name: '佛山市', value: [919.2,308.5]},
-            {name: '韶关市', value: [192.7,67.7]},
-            {name: '湛江市', value: [481.5,31.7]},
-            {name: '肇庆市', value: [246.2,119.4]},
-            {name: '江门市', value: [375.9,147.9]},
-            {name: '茂名市', value: [375.8,85.6]},
-            {name: '惠州市', value: [601.4,200.3]},
-            {name: '梅州市', value: [275.7,48.6]},
-            {name: '汕尾市', value: [178,53.2]},
-            {name: '河源市', value: [192.7,56.3]},
-            {name: '阳江市', value: [164,69.1]},
-            {name: '清远市', value: [293.6,99.4]},
-            {name: '东莞市', value: [1091.3,481.7]},
-            {name: '中山市', value: [530.5,157.5]},
-            {name: '潮州市', value: [214.9,60.4]},
-            {name: '揭阳市', value: [379.9,91.9]},
-            {name: '云浮市', value: [140.1,74.7]}
+            {name: '广州市', value: [6018121.395,3152651.424]},
+            {name: '深圳市', value: [11859766.43,3428272.063]},
+            {name: '珠海市', value: [7188423.247,1824105.654]},
+            {name: '汕头市', value: [6650451.24,4737561.833]},
+            {name: '佛山市', value: [11127650.65,6318877.548]},
+            {name: '韶关市', value: [3017264.692,3057578.924]},
+            {name: '湛江市', value: [9000155.007,2488765.685]},
+            {name: '肇庆市', value: [18964617.05,20846157.65]},
+            {name: '江门市', value: [37422043.34,11333723.74]},
+            {name: '茂名市', value: [6385562.006,2537558.381]},
+            {name: '惠州市', value: [23581671.95,11835324.79]},
+            {name: '梅州市', value: [17200505.01,7127638.171]},
+            {name: '汕尾市', value: [5250051.465,4753604.007]},
+            {name: '河源市', value: [4529071.563,2528946.217]},
+            {name: '阳江市', value: [5327077.605,5891191.635]},
+            {name: '清远市', value: [10678004.43,4387318.57]},
+            {name: '东莞市', value: [9931516.1,3127406.368]},
+            {name: '中山市', value: [6220936.876,2148792.918]},
+            {name: '潮州市', value: [4217394.22,5633935.217]},
+            {name: '揭阳市', value: [37422043.34,23478092.32]},
+            {name: '云浮市', value: [5359510.36,2303667.152]}
         ];
-        // var newData2 = flexData.map(function(item, index) {
-        //     return {name: item.name, value: palceCodData2[index].value.concat(item.value[1]), itemStyle: {color: '#7BFA55'}}
-        // })
-        var newData1 = guangdongData.map(function(item, index) {
-            return {name: item.name, value: palceCodData[index].value.concat(item.value), itemStyle: {color: '#f93'}}
-        })
         var moniData = palceCodData.map(function(item, index) {
-            return [palceCodData[0].value, item.value]
+            return {name: item.name, value: item.value.concat(flexData[index].value[0])}
         })
         var moniData2 = palceCodData.map(function(item, index) {
-            return [item.value, palceCodData[0].value]
+            return {name: item.name, value: item.value.concat(flexData[index].value[1])}
         })
-        // moniData.push(...moniData2)
-        function setData (data) {
-            var newData = []
-            for (let i = 0; i < 1; i++) {
-                newData.push(...data)
-            }
-            return newData
-        }
+        var max = 10000000, min = 0;
+        var maxSize4Pin = 40, minSize4Pin = 20;
         var option = {
             title: {
                 text: '',
@@ -177,56 +134,94 @@
                     color: '#fff'
                 }
             },
-            tooltip: {
-                trigger: 'item',
-                formatter: function (obj) {
-                    if (obj.seriesType === 'map3D') {
-                        return `${obj.name}</br>常驻人口：${flexData[obj.dataIndex].value[0]}<br>流动人口：${flexData[obj.dataIndex].value[1]}`
-                    }
+            legend: {
+                data: ['月流动人口', '日均流动人口'],
+                selectedMode: 'single',
+                textStyle: {
+                    color: '#fff',
+                    fontStyle: 'normal',
+                    fontFamily: '微软雅黑',
+                    fontSize: 12,            
                 }
             },
             bmap: {
                 show: false,
                 center: [113.075995,22.717055],
-                zoom: 9,
+                zoom: 8.8,
                 roam: true
             },
             series: [
             {
-                name: 'des',
+                name: '月流动人口',
                 type: 'scatter',
-                symbol: 'pin',
                 coordinateSystem: 'bmap',
-                zlevel: 10,
-                symbolSize: 70,
+                symbol: 'pin',
+                symbolSize: function (val) {
+                    var a = (maxSize4Pin - minSize4Pin) / (max - min);
+                    var b = minSize4Pin - a*min;
+                    b = maxSize4Pin - a*max;
+                    return a*val[2]+b;
+                },
                 label: {
                     normal: {
-                        show: true,
-                        formatter: '广州市',
+                        show: false,
+                        // position: 'top',
                         textStyle: {
-                            color: '#fff',
+                            // color: '#fff',
+                            // distance: 10,
+                            fontWeight: 'bolder',
                             fontSize: 12,
                         }
                     }
                 },
                 itemStyle: {
                     normal: {
-                        color: '#f54a76',
+                        color: '#F62157',
                         shadowColor: 'rgba(0, 0, 0)',
                         shadowBlur: 20
                     }
                 },
-                data: [{name: '广州', value: [113.475995, 23.417055, 100]}]
+                zlevel: 6,
+                data: moniData,
             },
             {
-                name: '地点',
+                name: '日均流动人口',
+                type: 'scatter',
+                coordinateSystem: 'bmap',
+                symbol: 'pin',
+                symbolSize: function (val) {
+                    var a = (maxSize4Pin - minSize4Pin) / (max - min);
+                    var b = minSize4Pin - a*min;
+                    b = maxSize4Pin - a*max;
+                    return a*val[2]+b;
+                },
+                label: {
+                    normal: {
+                        show: false,
+                        textStyle: {
+                            color: '#fff',
+                            fontSize: 9,
+                        }
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: '#d8c700',
+                        shadowColor: 'rgba(0, 0, 0)',
+                        shadowBlur: 20
+                    }
+                },
+                zlevel: 6,
+                data: moniData2,
+            },
+            {
+                name: '流动人口',
                 type: 'effectScatter',
                 coordinateSystem: 'bmap',
-                zlevel: 10,
-                color: '#f93',
                 rippleEffect: {
                     brushType: 'stroke'
                 },
+                symbolSize: 10,
                 label: {
                     normal:
                     {
@@ -247,66 +242,59 @@
                         formatter: '{b}'
                     }
                 },
-                symbolSize: 20,
                 showEffectOn: 'render',
                 itemStyle: {
                     normal: {
-                        color: '#d8c700',
+                        color: '#00e7ff',
                         shadowColor: 'rgba(0, 0, 0)',
                         shadowBlur: 20
                     }
                 },
-                data: palceCodData
+                data: moniData
             },
-            {
-                name: '迁移人口',
-                type: 'lines',
-                coordinateSystem: 'bmap',
-                large: true,
-                largeThreshold: 100,
-                effect: {
-                    show: true,
-                    period: 6,
-                    trailLength: 0.9,
-                    color: '#00f1ff',
-                    symbolSize: 5,
-                },
-                lineStyle: {
-                    normal: {
-                        color: '#00f1ff',
-                        width: 0,
-                        curveness: 0.2
-                    }
-                },
-                data: setData(moniData),
-                zlevel: 2
-            },
-            {
-                name: '迁移人口',
-                type: 'lines',
-                coordinateSystem: 'bmap',
-                large: true,
-                effect: {
-                    show: true,
-                    period: 6,
-                    trailLength: 0,
-                    symbol: planePath,
-                    symbolSize: 30
-                },
-                lineStyle: {
-                    normal: {
-                        color: '#00f1ff',
-                        width: 0,
-                        opacity: 0.4,
-                        curveness: 0.2
-                    }
-                },
-                data: setData(moniData),
-                zlevel: 3,
-                animationDurationUpdate: function (idx) {
-                    return idx * 100
-                }
-            }
+            // {
+            //     name: '日均流动人口',
+            //     type: 'effectScatter',
+            //     coordinateSystem: 'bmap',
+            //     symbolSize: function (val) {
+            //         var a = (maxSize4Pin - minSize4Pin) / (max - min);
+            //         var b = minSize4Pin - a*min;
+            //         b = maxSize4Pin - a*max;
+            //         return a*val[2]+b;
+            //     },
+            //     rippleEffect: {
+            //         brushType: 'stroke'
+            //     },
+            //     label: {
+            //         normal:
+            //         {
+            //             show : true,
+            //             color: '#fff',
+            //             fontSize: 15,
+            //             position:'right',
+            //             distance: 10,
+            //             fontWeight: 'bolder',
+            //             textShadowColor: '#000',
+            //             textShadowBlur: 10,
+            //             formatter:'{b}'
+            //         },
+            //         emphasis: {
+            //             show: true,
+            //             color: '#fff',
+            //             position: 'right',
+            //             formatter: '{b}'
+            //         }
+            //     },
+            //     showEffectOn: 'render',
+            //     itemStyle: {
+            //         normal: {
+            //             color: '#FF6600',
+            //             shadowColor: 'rgba(0, 0, 0)',
+            //             shadowBlur: 20
+            //         }
+            //     },
+            //     data: moniData2
+            // }
             ]
         };
         $.get(uploadedDataURL, function (geoJson) {
@@ -324,7 +312,7 @@
                     }
                     var pointArray = [];
                     for (var i = 0; i < count; i++) {
-                        var ply = new BMap.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeOpacity: 1, strokeColor: "#fff", fillOpacity: 0.1, fillColor: '#627BC1'});
+                        var ply = new BMap.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeOpacity: 1, strokeColor: "#ccc", fillOpacity: 0.1, fillColor: '#627BC1'});
                         bmap.addOverlay(ply);
                     }    
                     bmap.setViewport(pointArray);               
